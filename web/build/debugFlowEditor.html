@@ -1,0 +1,168 @@
+﻿{% extends "main.html" %}
+
+{% block head %}
+    {{ jimi.jquery() }}
+	{{ jimi.visjs() }}	
+	<script src="{{ url_for('static', filename='javascript/debugFlowEditor.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascript/objectProperties.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascript/linkProperties.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascript/alert.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascript/existingObject.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascript/hotkeys.js') }}"></script>	
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/conductEditor.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/objectProperties.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/alert.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/debugFlowEditor.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='themes/default/default.css') }}">
+{% endblock %}
+
+{% block head2 %}
+	{{ jimi.monaco() }}
+{% endblock %}
+
+{% block body %}
+	<div class="debugFlowEditor-container">
+		<!-- Right Click Menus -->
+		<ul id="contextMenu" class="dropdown-menu contextMenuTrigger" role="menu" style="display:none" >
+			<li><a tabindex="-1" class="noHover hoverHand" style="display: block;" onclick="runDebuggerNew()">Run</a></li>
+			<li class="divider theme-dropdown-menu-divider"></li>
+			<li><a tabindex="-1" class="noHover hoverHand" style="display: block;" onclick="editFlowObject()">Edit</a></li>
+		</ul>
+		<ul id="contextMenu" class="dropdown-menu contextMenuAction" role="menu" style="display:none" >
+			<li><a tabindex="-1" class="noHover hoverHand" style="display: block;" onclick="runDebuggerNew()">Run</a></li>
+			<li class="divider theme-dropdown-menu-divider"></li>
+			<li><a tabindex="-1" class="noHover hoverHand" style="display: block;" onclick="editFlowObject()">Edit</a></li>
+		</ul>
+		<div class="debugFlowEditor-left">
+			<span>executed-flows:</span>
+			<hr>
+			<div class="eventList">
+			</div>
+		</div>
+		<div class="debugFlowEditor-right">
+			<div class="ui-main debugFlowchart">
+				<button onclick="clearDebugger()" id="debug_clear_button" class="btn btn-primary button clearDebugger">Clear</button>
+				<button onclick="showDebugSessions()" id="debug_sessions_button" class="btn btn-primary button sessionsDebugger">Sessions</button>
+				<button onclick="runDebugger()" id="debug_continue_button" disabled class="btn btn-primary button runDebugger">Continue</button>
+				<div class="debugFlowchart theme-content" id="flowchart"></div>
+			</div>
+		</div>
+		<div class="debugFlowEditor-bottom" id="debugFlowEditor-bottom">
+			<div class="debugFlowEditor-in">
+				<span>data-in:</span>
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+						<a class="nav-link active" id="data-in-event-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-in-event" role="tab" aria-controls="access" aria-selected="false">Event</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-in-action-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-in-action" role="tab" aria-controls="access" aria-selected="false">Action</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-in-var-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-in-var" role="tab" aria-controls="access" aria-selected="false">flowData Variables</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-in-data-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-in-data" role="tab" aria-controls="access" aria-selected="false">Raw</a>
+					</li>
+				</ul>
+				<div class="tab-content text-left" id="myTabContent">
+					<div class="tab-pane show active" id="data-in-event" role="tabpanel" aria-labelledby="data-in-event-tab">
+						<textarea id="debugFlowEditor-in-event" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-in-action" role="tabpanel" aria-labelledby="data-in-action-tab">
+						<textarea id="debugFlowEditor-in-action" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-in-var" role="tabpanel" aria-labelledby="data-in-var-tab">
+						<textarea id="debugFlowEditor-in-var" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-in-data" role="tabpanel" aria-labelledby="data-in-data-tab">
+						<textarea id="debugFlowEditor-in" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="debugFlowEditor-out">
+				<span>data-out:</span>
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+						<a class="nav-link active" id="data-out-event-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-out-event" role="tab" aria-controls="access" aria-selected="false">Event</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-out-action-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-out-action" role="tab" aria-controls="access" aria-selected="false">Action</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-out-var-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-out-var" role="tab" aria-controls="access" aria-selected="false">flowData Variables</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="data-out-data-tab" href="#" data-bs-toggle="tab" data-bs-target="#data-out-data" role="tab" aria-controls="access" aria-selected="false">Raw</a>
+					</li>
+				</ul>
+				<div class="tab-content text-left" id="myTabContent">
+					<div class="tab-pane show active" id="data-out-event" role="tabpanel" aria-labelledby="data-out-event-tab">
+						<textarea id="debugFlowEditor-out-event" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-out-action" role="tabpanel" aria-labelledby="data-out-action-tab">
+						<textarea id="debugFlowEditor-out-action" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-out-var" role="tabpanel" aria-labelledby="data-out-var-tab">
+						<textarea id="debugFlowEditor-out-var" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+					<div class="tab-pane show" id="data-out-data" role="tabpanel" aria-labelledby="data-out-data-tab">
+						<textarea id="debugFlowEditor-out" class="debugFlowData theme-panelTextArea"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="debugSessions" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-fullscreen" role="document">
+			<div class="modal-content panel">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Debug Sessions</h5>
+				</div>
+				<div class="modal-body">
+					<div class="list-group" id="existingDebugList">
+						
+					</div>
+				</div>
+				<div class="modal-footer justify-content-start">
+					<button type="button" class="btn btn-primary button" onclick="newDebugSession()"> New</button>
+					<button type="button" class="btn btn-primary button" onclick="getDebugSessions()">Refresh</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Startup -->
+	<script>
+		$(document).ready(function() {
+			if (!GetURLParameter("debugID")) {
+				getDebugSessions();
+				$("#debugSessions").modal('toggle');
+			} else {
+				debugSession = GetURLParameter("debugID");
+				refreshDebugSession();
+			}
+			// Future feature to enable the UI to be resizeable
+			// $('#debugFlowEditor-bottom').resizable({
+			// 	handles: "n"
+			// });
+		})
+	</script>
+	<!-- Right Click Menu -->
+	<script>
+		(function ($, window) {
+			$.fn.contextMenu = function (settings) {
+				return this.each(function () {
+					$(this).on("contextmenu", function (e) {
+						return false
+					});
+					//make sure menu closes on any click
+					$('body').click(function () {
+						$(".contextMenuTrigger").hide();
+						$(".contextMenuAction").hide();
+					});
+				});
+		};
+		})(jQuery, window);
+		$(".debugFlowchart").contextMenu({menuSelector: "#contextMenu" });
+	</script>
+{% endblock %}

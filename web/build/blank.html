@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+
+{% block head %}
+    {{ jimi.jquery() }}
+    {{ jimi.tables() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='themes/default/default.css') }}">
+    <script src="{{ url_for('static', filename='javascript/hotkeys.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+    <pre>{{ content }}</pre>
+{% endblock %}

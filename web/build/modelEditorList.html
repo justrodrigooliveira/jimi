@@ -1,0 +1,257 @@
+{% extends "main.html" %}
+
+{% block head %}
+    {{ jimi.jquery() }}
+    <script src="{{ url_for('static', filename='includes/jquery/js/jquery.datatables.min.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables-1.10.24/css/dataTables.bootstrap5.min.css') }}">
+    <script src="{{ url_for('static', filename='includes/datatables/js/dataTables.bootstrap.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables/css/fixedHeader.dataTables.min.css') }}">
+    <script src="{{ url_for('static', filename='includes/datatables/js/dataTables.fixedHeader.min.js') }}"></script>
+
+
+    <script src="{{ url_for('static', filename='javascript/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/alert.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="container-fluid">
+        <div id="createObjectContainer" class="hide">
+            <button class="btn btn-primary createObject button" onclick="createObject()">Create Object</button>
+        </div>
+        <table id="table" class="display theme-table" style="width:100%;"></table>
+        <div id="saveObjectContainer" class="hide">
+            <button class="btn btn-primary button" onclick="saveObject()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        var modelEditorTable = null;
+        // Horrible hack to ensure that you go to the top of the page if you open a differnet model ( this is because modelEditor refreshes between page calls )
+        var currentModelName = sessionStorage.getItem("modelEditor_currentModelName");
+        function buildTable_ListModels() {
+            modelEditorTable = $('#table').DataTable({
+                "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+                "paging" : false,
+                "order" : [[ 0, "asc" ]],
+                columns : [
+                    { "data": null, "name": "name", "title": "Name", "autoWidth": true, render: function (data, type, row) {
+                            return '<a href="?modelName='+data+'">'+data+'</a>';
+                        }
+                    }
+                ],
+                columnDefs: [
+                    {
+                        orderable: true
+                    }
+                ]
+            });
+
+            $('.dataTables_length').addClass('bs-select');
+            $('.dataTables_filter input[type="search"]').css({'width':'200px'});
+            $('.dataTables_filter input[type="search"]').addClass("textbox")
+
+            $('#table tbody').on('click', 'tr', function () {
+                var data = modelEditorTable.row( this ).data();
+                modelEditorTable.destroy();
+                $('#table').empty();
+                window.location.search += '?modelName='+data[0];
+            } );
+
+            $.ajax({url:"/api/1.0/models/", type:"GET", success: function ( result ) {
+                    for ( resultItem in result["models"] ) {
+                        modelEditorTable.row.add([result["models"][resultItem]]);
+                    }
+                    modelEditorTable.draw();
+                }
+            })
+        }
+
+        function buildTable_ListModel( modelName ) {
+            $('#createObjectContainer').toggleClass("hide");
+            // Horrible hack to ensure that you go to the top of the page if you open a differnet model ( this is because modelEditor refreshes between page calls )
+            // Basicly it turns on and off stateSave as the table has to be rendered with the state cleared when openning a new model to ensure your at the tope
+            loadState = true;
+            if (currentModelName != modelName) {
+                currentModelName = modelName;
+                loadState = false;
+                sessionStorage.setItem("modelEditor_currentModelName", currentModelName);
+            }
+            modelEditorTable = $('#table').DataTable({
+                ajax: 'pollTableListModel/'+modelName+"/poll/",
+                processing: false,
+                serverSide: true,
+                sScrollY: "calc(100% - 100px)",
+                deferRender: true,
+                stateSave: loadState,
+                scroller: true,
+                bLengthChange: false,
+                bInfo: false,
+                "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+                columns : [
+                    { "name": "_id", "title": "_id", "autoWidth": true, render: function (data, type, row) {
+                            return '<a href="?modelName='+modelName+'&_id='+data+'">'+data+'</a>';
+                        }
+                    },
+                    { "name": "name", "title": "Name", "autoWidth": true, render: $.fn.dataTable.render.text() },
+                    { "name": "lastUpdateTime", "title": "lastUpdateTime", "autoWidth": true, render: function (data, type, row) {
+                            return localTime(data);
+                        }
+                    },
+                    { 
+                        "name": "options", "title": "Options", "autoWidth": true, render: function (data, type, row) {
+                            return '<button class="btn btn-primary button" id="rowid' + data + '" onclick="deleteObject(\''+data+'\')">Del</button>';
+                        }
+                    },
+                ],
+                dom: '<"pull-left"f><"pull-right"l>tip',
+                columnDefs: [
+                    {
+                        orderable: true
+                    }
+                ]
+            });
+
+            $('.dataTables_length').addClass('bs-select');
+            $('.dataTables_filter input[type="search"]').css({'width':'200px'});
+            $('.dataTables_filter input[type="search"]').addClass("textbox");
+            $('.div.dataTables_paginate').hide();
+            $('#table_paginate').hide();
+        } 
+
+        function EditModel(modelName,id) {
+            $('#saveObjectContainer').toggleClass("hide");
+            modelEditorTable = $('#table').DataTable({
+                "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+                fixedHeader: {
+                    header: true,
+                    footer: true
+                },
+                "paging" : false,
+                "order" : [[ 0, "asc" ]],
+                columns : [
+                    { "data": "property", "name": "property", "title": "Property", "autoWidth": true, render: $.fn.dataTable.render.text() },
+                    { 
+                        "data": "value", "name": "value", "title": "Value", "autoWidth": true, render: function (data, type, row) {
+                            return '<textarea type="text" class="form-control form-control-sm full-width textbox" id="property_'+ data[0] +'">'+data[1]+'</textarea>';
+                        }
+                    }
+                ],
+                columnDefs: [
+                    {
+                        orderable: true
+                    }
+                ]
+            });
+
+            $('.dataTables_length').addClass('bs-select');
+            $('.dataTables_filter input[type="search"]').css({'width':'200px'});
+            $('.dataTables_filter input[type="search"]').addClass("textbox")
+
+            $.ajax({url:"/api/1.0/models/"+modelName+"/"+id+"/", type:"GET", success: function ( result ) {
+                    for ( resultItem in result ) {
+                        if (typeof result[resultItem] == "object") {
+                            modelEditorTable.row.add({ "property" : resultItem, "value" : [ resultItem, JSON.stringify(result[resultItem]) ], "initalValue" : JSON.stringify(result[resultItem]) });
+                        } else {
+                            modelEditorTable.row.add({ "property" : resultItem, "value" : [ resultItem, result[resultItem] ], "initalValue" : String(result[resultItem]) });
+                        }
+                    }
+                    modelEditorTable.draw();
+                }
+            })
+
+            $(window).bind('keydown', function(event) {
+                if (event.ctrlKey || event.metaKey) {
+                    switch (String.fromCharCode(event.which).toLowerCase()) {
+                    case 's':
+                        event.preventDefault();
+                        saveObject();
+                        break;
+                    }
+                }
+            })
+        }
+
+        function saveObject() {
+            var modelName = GetURLParameter("modelName")
+            var id = GetURLParameter("_id")
+            var jsonData = {}
+            modelEditorTable.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                var data = this.data();
+                if (data["initalValue"] != $("#property_"+data["value"][0]).val())
+                {
+                    jsonData[data["value"][0]] = $("#property_"+data["value"][0]).val()
+                }
+            } );
+            jsonData["CSRF"] = CSRF
+            $.ajax({url:"/api/1.0/models/"+modelName+"/"+id+"/", type:"POST", data: JSON.stringify(jsonData), contentType:"application/json", success: function ( result ) {
+                    dropdownAlert(null,"Success","Save Successful",1000);
+                },
+                error: function ( result ) {
+                    dropdownAlert(null,"Error","Unknown error occurred",1000);
+                }
+            });
+        }
+
+        function deleteObject(objectID) {
+            if (confirm("Are you sure you want to delete object ("+objectID+")?")) {
+                var pathname = window.location.pathname;
+                $.ajax({url:"/api/1.0/models/"+GetURLParameter("modelName")+"/"+objectID+"/", data: JSON.stringify({CSRF: CSRF}), type:"DELETE", success: function ( result ) {
+                        dropdownAlert(null,"Success","Object deleted",1000);
+                        $("#rowid" + objectID).closest("tr").remove();
+                    },
+                    error: function ( result ) {
+                        dropdownAlert(null,"Error","Unknown error occurred",1000);
+                    }
+                })
+            }
+        }
+
+        function editObject(objectID) {
+            window.location.search += '&_id='+objectID;
+        }
+
+        function createObject() {
+            $.ajax({url:"/api/1.0/models/"+GetURLParameter("modelName")+"/", data: JSON.stringify({CSRF: CSRF}), type:"PUT", success: function ( result ) {
+                    editObject(result["_id"]);
+                },
+                error: function ( result ) {
+                    dropdownAlert(null,"Error","Unknown error occurred",1000);
+                }
+            })
+        }
+
+        function GetURLParameter(sParam)
+        {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++) 
+            {
+                var sParameterName = sURLVariables[i].split('=');
+                if (sParameterName[0] == sParam) 
+                {
+                    return sParameterName[1];
+                }
+            }
+        }
+
+        function locationHandler() {
+            var modelName = GetURLParameter("modelName")
+            if (modelName) { 
+                var id = GetURLParameter("_id")
+                if (id) {
+                    EditModel(modelName,id); 
+                    return
+                }
+                buildTable_ListModel(modelName); 
+                return
+            }
+            buildTable_ListModels();
+        }
+
+        $(document).ready(function () {
+            locationHandler();
+        });
+    </script>
+
+{% endblock %}

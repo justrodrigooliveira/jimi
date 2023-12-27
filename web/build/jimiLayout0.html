@@ -1,0 +1,33 @@
+{% import "jimi.html" as jimi %}
+
+<script>
+    var CSRF="{{ CSRF }}";
+</script>
+
+<html>
+    <head>
+        {% block head %}
+        {% endblock %}
+        {{ jimi.theme() }}
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row g-0 m-1 justify-content-md-center h-40">
+                <div class="col col-lg-5 m-1 h-100 panel">
+                    {% block block1 %}
+                    {% endblock %}
+                </div>
+                <div class="col col-lg-5 m-1 h-100 panel">
+                    {% block block2 %}
+                    {% endblock %}
+                </div>
+            </div>
+            <div class="row g-0 m-2 justify-content-md-center h-60">
+                <div class="col col-lg-12 m-1 h-100 panel">
+                    {% block block3 %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

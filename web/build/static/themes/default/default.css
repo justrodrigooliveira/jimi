@@ -1,0 +1,208 @@
+p {
+    color: var(--textColor);
+}
+
+.theme-navButton {
+    background-color: var(--componentBackground2);
+}
+
+.theme-navButton:hover {
+    background-color: var(--componentBackgroundSelect);
+}
+
+.theme-content {
+    background-color: var(--mainBackgroundColor);
+    border: none;
+    color: var(--textColor);
+}
+
+.theme-panelContainer {
+    background-color: var(--panelBackgroundColor);
+    color: var(--textColor);
+    border-color: var(--panelBorderColor);
+    border-radius: 2px;
+}
+
+.theme-panelHeader {
+    background-color: var(--panelBackgroundColor);
+    color: var(--textColor);
+}
+
+.theme-panelHeader-Active {
+    background-color: var(--panelBackgroundColor);
+    color: var(--textColor);
+}
+
+.theme-panelBody {
+    background-color: var(--panelBackgroundColor);
+}
+
+.theme-panelFooter {
+    background-color: var(--panelBackgroundColor);
+}
+
+.theme-panelButton {
+    background-color: var(--componentBackground2);
+    border-color: var(--componentBorderColor);
+    color: var(--textColor);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.theme-panelButton:hover {
+    background-color: var(--componentBackgroundSelect);
+    border-color: var(--componentBorderColor);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.theme-panelBreakTitle {
+    text-align: center;
+    width: 100%;
+    display:inline-block
+}
+
+.theme-panelBreakLine {
+    height: 1px;
+    border: 0;
+    border-top: 1px solid var(--textColor);;
+    margin: 1em 0;
+    padding: 0;
+    width: 100%;
+    display:inline-block
+}
+
+.theme-panelTextArea {
+    background-color: var(--panelComponentBackground); 
+    min-height: 75px;
+    color: var(--textColor);
+    border: none;
+}
+
+.theme-panelTextArea-half {
+    background-color: var(--panelComponentBackground); 
+    color: var(--textColor);
+    border: none;
+    width: 50%;
+}
+
+.theme-panelTextArea-14 {
+    background-color: var(--panelComponentBackground); 
+    color: var(--textColor);
+    border: none;
+    width: 25%;
+}
+
+.theme-panelTextbox {
+    background-color: var(--panelComponentBackground); 
+    color: var(--textColor);
+    border: none;
+}
+
+.theme-panelTextbox-half {
+    background-color: var(--panelComponentBackground); 
+    color: var(--textColor);
+    border: none;
+    width: 50%;
+}
+
+.theme-panelTextbox-34 {
+    background-color: var(--panelComponentBackground); 
+    color: var(--textColor);
+    border: none;
+    width: 75%;
+}
+
+.theme-panelSelect {
+    background-color: var(--panelComponentBackground); 
+    border: none;
+}
+
+.theme-panelCheckbox {
+    background-color: var(--panelComponentBackground); 
+    border: none;
+}
+
+.theme-json {
+    background-color: var(--panelComponentBackground);
+    color: var(--textColor);
+}
+
+.theme-jsonkey {
+    color: #ff2c10;
+}
+
+.theme-jsonstring {
+    color: #fff;
+}
+
+.theme-jsonboolean {
+    color: #32a732;
+}
+
+.theme-jsonnull {
+    color: #9b9b9b;
+}
+
+.theme-dropdown-menu {
+    background-color: var(--panelBackgroundColor) !important;
+    border-color: var(--panelComponentBorder) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+.theme-dropdown-menu > li > a {
+    color: var(--textColor) !important;
+    width: 100%;
+}
+
+.theme-dropdown-menu > li:hover > a {
+    background-color: var(--panelComponentBackground) !important;
+    color: var(--textColor) !important;
+}
+
+.theme-dropdown-menu-divider {
+    border-color: var(--panelComponentBorder) !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+}
+
+
+/* selectbox */
+.select2-container--theme-panelSelect .select2-selection--single {
+    background-color: var(--panelComponentBackground);
+    border: none;
+    height: 20px;
+}
+
+/* item hover */
+.select2-container--theme-panelSelect .select2-results__option[aria-selected=true] {
+    background-color: var(--panelComponentBackground);
+    color: var(--textColor);
+}
+
+/* search box */
+.select2-container--theme-panelSelect .select2-search--dropdown .select2-search__field {
+    background-color: var(--panelComponentBackground);
+    color: var(--textColor);
+    border: none;
+}
+
+.select2-container--theme-panelSelect .select2-search--dropdown {
+    border: none;
+    outline: 0;
+    box-shadow: none;
+    outline: 0;
+    padding: 0;
+}
+
+/* search results */
+.select2-container--theme-panelSelect .select2-results {
+    background-color: var(--panelComponentBackground);
+    color: var(--textColor);
+}
+
+.select2-container--theme-panelSelect .select2-results > .select2-results__options {
+    max-height: 200px;
+    overflow-y: auto; 
+}

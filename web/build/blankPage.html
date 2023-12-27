@@ -1,0 +1,17 @@
+﻿{% extends "main.html" %}
+
+{% block head %}
+    {{ jimi.jquery() }}
+	{{ jimi.tables() }}
+    <script src="{{ url_for('static', filename='javascript/alert.js') }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/alert.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='themes/default/default.css') }}">
+{% endblock %}
+
+{% block main %}
+	{% block body %}
+	{% endblock %}
+	{% block html %}
+	{% endblock %}
+{% endblock %}

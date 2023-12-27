@@ -1,0 +1,391 @@
+{% macro theme() -%} 
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='includes/popper-2.9.2/popper-2.9.2.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/bootstrap-5.0.0-beta3/css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='includes/bootstrap-5.0.0-beta3/js/bootstrap.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/bootstrap-icons-1.5.0/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="/theme.css">
+{%- endmacro -%}
+
+{% macro jquery() -%}
+    <script src="{{ url_for('static', filename='includes/jquery-3.6.0/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='includes/jquery/js/jquery-ui-1.12.1.js') }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='includes/jquery/css/jquery-ui.theme.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='includes/jquery/css/jquery-ui.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='includes/jquery/css/jquery-ui.structure.css') }}">
+    <script src="{{ url_for('static', filename='javascript/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/alert.js') }}"></script>
+{% endmacro -%}
+
+{% macro charts() -%}
+    <script src="{{ url_for('static', filename='includes/chartjs-3.0.2/js/chartjs.js') }}"></script>
+{%- endmacro -%}
+
+{% macro monaco() -%}
+    <script>
+        var require = { paths: { 'vs': "{{ url_for('static', filename='includes/monaco-0.26.1/vs') }}" } };
+    </script>
+    <script src="{{ url_for('static', filename='includes/monaco-0.26.1/vs/loader.js') }}"></script>
+{% endmacro -%}
+
+{% macro quill() -%}
+    <script src="{{ url_for('static', filename='includes/quill/quill.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/quill/quill.snow.css') }}">
+{% endmacro -%}
+
+{% macro chartPolling(id,pollAPI,autoPoll) -%}
+    <script>
+        window.addEventListener("load", function(){
+            function refresh_chart{{ id }}() {
+                var bodyData = { "CSRF" : CSRF, "datasets" : chart_{{ id }}.data.datasets, "labels" : chart_{{ id }}.data.labels }
+                var requestOptions = {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: JSON.stringify(bodyData)
+                };
+                fetch('{{ pollAPI }}',requestOptions,{{ autoPoll }}).then(result => {
+                    return result.json()
+                }).then(resultJson => {
+                    if ( resultJson["labels"].length > 0 ) {
+                        chart_{{ id }}.data.labels = resultJson["labels"]
+                    }
+                    if ( resultJson["datasets"].length > 0 ) {
+                        for ( dataset in resultJson["datasets"] ) {
+                            chart_{{ id }}.data.datasets.push(resultJson["datasets"][dataset])  
+                        }
+                    }
+                    if ( resultJson["updates"].length > 0 ) {
+                        for ( index in resultJson["updates"] ) {
+                            chart_{{ id }}.data.datasets[resultJson["updates"][index]["index"]].data = resultJson["updates"][index]["data"]
+                        }
+                    }
+                    if ( resultJson["deletes"].length > 0 ) {
+                        for ( index in resultJson["deletes"] ) {
+                            chart_{{ id }}.data.datasets.splice(resultJson["deletes"][index]["index"])
+                        }
+                    }
+                    chart_{{ id }}.update()
+                })
+                {% if autoPoll > 0 %}
+                    setTimeout(refresh_chart{{ id }}, {{ autoPoll }});
+                {% endif %}
+            }
+            refresh_chart{{ id }}();
+        });
+    </script>
+{%- endmacro -%}
+
+{% macro radar(id,title,pollAPI,autoPoll=0) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="chartContainer">
+        <canvas id="chart_{{ id }}" class="chart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById("chart_{{ id }}");
+        var chart_{{ id }} = new Chart(ctx, {
+            type: 'radar',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scale: {
+                    ticks: {
+                        display: false,
+                        maxTicksLimit: 3
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    {{ chartPolling(id,pollAPI,autoPoll) }}
+{%- endmacro -%}
+
+{% macro doughnut(id,title,pollAPI,autoPoll=0) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="chartContainer">
+        <canvas id="chart_{{ id }}" class="chart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById("chart_{{ id }}");
+        var chart_{{ id }} = new Chart(ctx, {
+            type: 'doughnut',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    {{ chartPolling(id,pollAPI,autoPoll) }}
+{%- endmacro -%}
+
+{% macro pie(id,title,pollAPI,autoPoll=0) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="chartContainer">
+        <canvas id="chart_{{ id }}" class="chart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById("chart_{{ id }}");
+        var chart_{{ id }} = new Chart(ctx, {
+            type: 'pie',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    {{ chartPolling(id,pollAPI,autoPoll) }}
+{%- endmacro -%}
+
+{% macro bar(id,title,pollAPI,autoPoll=0,stacked="false") -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="chartContainer">
+        <canvas id="chart_{{ id }}" class="chart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById("chart_{{ id }}");
+        var chart_{{ id }} = new Chart(ctx, {
+            type: 'bar',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+                {% if stacked == "true" %}
+                , 
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+                {% endif %}
+            }
+        });
+    </script>
+    {{ chartPolling(id,pollAPI,autoPoll) }}
+{%- endmacro -%}
+
+{% macro line(id,title,pollAPI,autoPoll=0) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="chartContainer">
+        <canvas id="chart_{{ id }}" class="chart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById("chart_{{ id }}");
+        var chart_{{ id }} = new Chart(ctx, {
+            type: 'line',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    {{ chartPolling(id,pollAPI,autoPoll) }}
+{%- endmacro -%}
+
+{% macro tables() -%}
+    <script src="{{ url_for('static', filename='includes/jquery-3.6.0/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='includes/datatables-1.10.24/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='includes/datatables-1.10.24/js/dataTables.bootstrap5.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables-1.10.24/css/dataTables.bootstrap5.min.css') }}">
+    <script src="{{ url_for('static', filename='includes/datatables-scroller-2.0.3/js/dataTables.scroller.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables-scroller-2.0.3/css/scroller.dataTables.min.css') }}">
+    <script>
+        window.alert = (function() {
+            var nativeAlert = window.alert;
+            return function(message) {
+                message.indexOf("DataTables warning") === 0 ? console.warn(message) : nativeAlert(message);
+            }
+        })();
+    </script>
+{%- endmacro -%}
+
+{% macro table(id,title,pollAPI,autoPoll=0) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <table id="table_{{ id }}" class="display theme-table" style="width:100%;"></table>
+    <script>
+        var table__{{ id }};
+        var table__{{ id }}_rowIndex;
+        window.addEventListener("load", function(){
+            var requestOptions = {
+                method: 'GET',
+                credentials: 'include',
+            };
+            fetch('{{ pollAPI }}build/',requestOptions,2000).then(result => {
+                return result.json()
+            }).then(resultJson => {
+                var table_{{ id }} = $('#table_{{ id }}').DataTable( { 
+                    ajax: '{{ pollAPI }}poll/',
+                    processing: true,
+                    serverSide: true,
+                    scrollY: "100%",
+                    deferRender: true,
+                    stateSave: true,
+                    scroller: true,
+                    "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+                    columns : resultJson["columns"],
+                    language: {
+                        search: ""
+                    },
+                    dom: '<"pull-left"f><"pull-right"l>tip',{% if autoPoll > 0 %}
+                    "preDrawCallback": function( settings ) {
+                        scrollPosition = $(".dataTables_scrollBody").scrollTop();
+                    },
+                    "drawCallback": function( settings ) {
+                        $(".dataTables_scrollBody").scrollTop(scrollPosition);
+                        if(typeof table__{{ id }}_rowIndex != 'undefined') {
+                            table__{{ id }}.row(table__{{ id }}_rowIndex).nodes().to$().addClass('row_selected');                       
+                        }
+                    }
+                    {% endif %}
+                });
+                $('#table_{{ id }}_filter input').hide();
+                {% if autoPoll > 0 %}
+                    setInterval( function () { table_{{ id }}.ajax.reload(null, false); }, {{ autoPoll }} );
+                {% endif %}
+            });
+        });
+    </script>
+{%- endmacro -%}
+
+{% macro visjs() -%}
+    <script src="{{ url_for('static', filename='includes/visjs/js/vis-data.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='includes/visjs/js/moment.js') }}"></script>
+    <script src="{{ url_for('static', filename='includes/visjs/js/vis-timeline-graph2d.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='includes/visjs/css/vis-timeline-graph2d.min.css') }}">
+    <script src="{{ url_for('static', filename='includes/visjs/js/vis-network.min.js') }}"></script>
+{%- endmacro -%}
+
+{% macro visjsnetwork(id,title,pollAPI,physics="false") -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="flowchart" id="visjsnetwork_{{ id }}"></div>
+    <script>
+        $("#visjsnetwork_{{ id }}").height($("#visjsnetwork_{{ id }}").parent().height())
+        window.addEventListener("load", function(){
+            var requestOptions = {
+                method: 'GET',
+                credentials: 'include',
+            };
+            fetch('{{ pollAPI }}',requestOptions,2000).then(result => {
+                return result.json()
+            }).then(resultJson => {
+                var container = document.getElementById("visjsnetwork_{{ id }}");
+                var data = {
+                    nodes: resultJson["nodes"],
+                    edges: resultJson["edges"]
+                };
+                if(resultJson.hasOwnProperty('options')){
+                    var options = resultJson["options"];
+                } else {
+                    var options = {
+                        interaction: {
+                            tooltipDelay: 200,
+                            hideEdgesOnDrag: true,
+                            hideEdgesOnZoom: true,
+                        },
+                        layout: {
+                            improvedLayout: false
+                        },
+                        physics: {
+                            enabled: {{ physics }},
+                            timestep: 0.1
+                        },
+                        nodes: {
+                            shape: "dot",
+                            color: {
+                                background: "#4090c9",
+                                highlight: {
+                                    background: "#000",
+                                    border: "#FFF"
+                                }
+                            },
+                            font: {
+                                size: 10,
+                                face: "Tahoma",
+                                color: "#bfbfbf"
+                            }
+                        },
+                        edges: {
+                            width: 1,
+                            selectionWidth: 1,
+                            color: {
+                                color: "#ffffff2f", 
+                                highlight: "#FFF",
+                            },
+                            smooth: {
+                                type: "continuous",
+                            }
+                        }
+                    };
+                }
+                var visjsnetwork_{{ id }} = new vis.Network(container, data, options);
+                visjsnetwork_{{ id }}.stabilize(50);
+            });
+        });
+    </script>
+{%- endmacro -%}
+
+{% macro visjstimeline(id,title,pollAPI) -%}
+    <label class="unselectable panelHeader">{{ title }}</label>
+    <div class="visjstimeline" id="visjstimeline_{{ id }}"></div>
+    <script>
+        window.addEventListener("load", function(){
+            var requestOptions = {
+                method: 'GET',
+                credentials: 'include',
+            };
+            fetch('{{ pollAPI }}',requestOptions,2000).then(result => {
+                return result.json()
+            }).then(resultJson => {
+                var data = new vis.DataSet(resultJson["timeline"]);      
+                var container = document.getElementById("visjstimeline_{{ id }}");
+                var options = {
+                    height: "100%",
+                }
+                var visjstimeline_{{ id }} = new vis.Timeline(container, data, options);
+            });
+        });
+    </script>
+{%- endmacro -%}

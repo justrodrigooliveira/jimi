@@ -1,0 +1,5 @@
+* -linguist-detectable
+*.py linguist-detectable
+/web/build/static/javascript/* linguist-detectable
+/web/build/static/css/* linguist-detectable
+/web/build/*.html linguist-detectable

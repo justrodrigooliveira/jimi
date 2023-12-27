@@ -1,0 +1,235 @@
+{% import "jimi.html" as jimi %}
+
+<script>
+    var CSRF="{{ CSRF }}";
+</script>
+
+<html>
+    <head>
+        {% block head %}
+        {% endblock %}
+        {{ jimi.theme() }}
+        <script src="{{ url_for('static', filename='includes/datatables-1.10.24/js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='includes/datatables-1.10.24/js/dataTables.bootstrap5.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables-1.10.24/css/dataTables.bootstrap5.min.css') }}">
+        <script src="{{ url_for('static', filename='includes/datatables-scroller-2.0.3/js/dataTables.scroller.min.js') }}"></script>
+        <style>
+            #topbar {
+                top: 0;
+                left: 0;
+                z-index: 1;
+                width: 100%;
+                max-width: 100%;
+                background-color: var(--menuBackgroundColor);
+                height: 50px;
+                box-shadow: 0 1px 6px var(--panelShadowColor1), 0 1px 4px var(--panelShadowColor2);
+                border-style: solid;
+                border-color: var(--panelBorderColor);
+                border-width: 1px;
+                color: var(--textColor);
+                padding-left: 10px;
+                display: flex;
+                min-width: 1130px;
+                margin-right: 25px;
+            }
+
+            #topbar-right {
+                min-width: 350px;
+                margin-right: 10px;
+                float: right;
+                text-align: right;
+            }
+
+            .linkRight {
+                float: right;
+            }
+
+            .home {
+                padding-left: 10px;
+                padding-right: 30px;
+                vertical-align: middle;
+                text-align: center;
+                display: flex;
+                height: 100%;
+                flex-direction: column;
+                justify-content: center;
+                line-height: unset;
+                font-weight: 600;
+                font-size: 35px;
+                color: var(--textColor);
+            }
+
+            .home:hover {
+                color: var(--textColor);
+                text-decoration: none;
+            }
+
+            .home:active, .homeActive {
+                color: var(--textColor);
+                text-decoration: none;
+                background-color: unset;
+            }
+
+            .link {
+                padding-left: 10px;
+                padding-right: 10px;
+                text-align: center;
+                vertical-align: bottom;
+                display: flex;
+                height: 100%;
+                flex-direction: column;
+                justify-content: flex-end;
+                color: var(--textColor);
+                min-width:110px;
+            }
+
+            .link:hover {
+                background-color: var(--hoverColor);
+                color: var(--textColor);
+                text-decoration: none;
+            }
+
+            .link:focus {
+                background-color: var(--hoverColor);
+            }
+
+            .link:active {
+
+            }
+
+            .linkDropdown {
+                display: block;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                text-align: left;
+            }
+
+            .modal-dialog-search {
+                max-width: 50%;
+                min-height: 25%;
+            }
+        </style>
+        {% block head2 %}
+        {% endblock %}
+    </head>
+    <body>
+        <header class="site-header sticky-top">
+            <nav class="container-fluid flex-md-row justify-content-between" id="topbar">
+                <a exact class="home" href="/">jimi</a>
+                {% if "status" in menuItems %}<a exact class="link bi-columns" href="/status/">Status</a>{% endif %}
+                {% if "conducts" in menuItems %}<a exact class="link bi-stack" href="/conducts/">Conducts</a>{% endif %}
+                {% if "plugins" in menuItems %}<a exact class="link bi-grid" href="/plugins/">Applications</a>{% endif %}
+                {% if "storage" in menuItems %}<a exact class="link bi-files" href="/storage/">Storage</a>{% endif %}
+                {% if "secret" in menuItems %}<a exact class="link bi-key" href="/secrets/">Secrets</a>{% endif %}
+                {% if "modelEditor" in menuItems %}<a exact class="link bi-table" href="/modelEditor">Model Editor</a>{% endif %}
+                <!-- <a exact class="link bi-search" href="#" data-bs-toggle="modal" data-bs-target="#globalSearch">Search</a> -->
+                <div class="container" id="topbar-right">
+                    <a class="link linkRight bi-door-open" href="/logout/">Logout</a>
+                    <a class="link linkRight bi-person" href="/myAccount/">My Account</a>
+                    {% if isAdmin %}
+                    <div class="dropdown">
+                        <a class="link linkRight bi-gear" href="#" data-bs-toggle="dropdown" aria-expanded="false" id="adminDropdown">Administration</a>
+                        <ul class="dropdown-menu" style="z-index: 1; position: relative;" aria-labelledby="adminDropdown">
+                          <li><a class="link linkDropdown bi-shop" href="/plugins/store/"> Application Store</a></li>
+                          <li><a class="link linkDropdown bi-server" href="/admin/cluster/"> Cluster Settings</a></li>
+                          <li><a class="link linkDropdown bi-building" href="/admin/organisation/"> Organisation Settings</a></li>
+                        </ul>
+                    </div>   
+                    {% endif %}             
+                </div>
+            </nav>
+        </header>
+
+        <main class="container_main">
+            {% block body %}
+                <div class="position-relative overflow-hidden px-5 mx-3" id="container_main_overflow">
+                    {% block main %}
+                    {% endblock %}
+                </div>
+            {% endblock %}
+        </main>
+
+        <div class="position-fixed bottom-0 end-0 p-3" id="alertContainer">
+            <div id="mainAlert" class="toast panel" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto" id="alert-header">Bootstrap</strong>
+                    <small id="alert-smallText">jimi</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <p id="alert-message"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="globalSearch" tabindex="-1" role="dialog" aria-labelledby="Global Search" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-search" role="document">
+                <div class="modal-content panel">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="globalSearchTitle">Search jimi</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <div class="form-floating" style="min-width: 96%;">
+                                <input type="search" class="form-control textbox" id="searchInput" placeholder="search" value="">
+                                <label for="searchInput">Search</label>
+                            </div>
+                            <button id="searchButton" type="button" onclick="search()" class="btn btn-primary button bi-search"></button>
+                        </div>
+                        <br>
+                        <table id="example" class="display" width="100%"></table>
+                    </div>
+                    <div class="modal-footer justify-content-start">
+                        <button type="button" class="btn btn-primary button" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Handles button event on pressing enter
+            var input = document.getElementById("searchInput");
+            input.addEventListener("keyup", function(event) {
+            // Number 13 is the "Enter" key on the keyboard
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("searchButton").click();
+            }
+            }); 
+
+            $(document).ready(function () {
+                $(window).bind("keydown", function (event) { 
+                    if (event.ctrlKey || event.metaKey) {
+                        if (event.keyCode == 192) {
+                            $('#globalSearch').modal('show');
+                        }
+                    }
+                })
+            });
+
+            let table = $('#example').DataTable({columns : [{}], searching: false});
+
+            function search() {
+                var body = {query: $("#searchInput").val()};
+                table.destroy();
+                $('#example').empty();
+                table = $('#example').DataTable({
+                    "searching": false,
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        url: "/search", type : "GET", data:body, contentType:"application/json"
+                    },
+                    scrollY: "100%",
+                    deferRender: true,
+                    stateSave: true,
+                    // scroller: true,
+                    "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+                    columns : [{"name" : "name", "title" : "Name"},{"name" : "type", "title" : "Type"},{"name" : "actions", "title" : "Actions"}],
+                    // dom: '<"pull-left"f><"pull-right"l>tip'
+                });
+                $('#globalSearch').modal('handleUpdate')
+            }
+        </script>
+    </body>
+</html>

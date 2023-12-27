@@ -1,0 +1,139 @@
+.debugFlowEditor-container {
+    display: grid;
+    grid-template-columns: 20% 80%;
+    grid-template-rows: 60% 40%;
+    grid-template-areas:
+        "left right"
+        "footer footer";
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+.debugFlowEditor-left {
+    grid-area: left;
+    background-color: var(--panelBackgroundColor);
+    border-right-style: solid;
+    border-color: var(--panelBorderColor);
+    color: var(--textColor);
+    padding: 0 10px 0 10px;
+    overflow-y: scroll;
+}
+
+.debugFlowEditor-right {
+    grid-area: right;
+}
+
+.debugFlowEditor-bottom {
+    grid-area: footer;
+}
+
+.debugFlowEditor-in {
+    display: block;
+    float: left;
+    width: 50%;
+    height: 100%;
+    background-color: var(--panelBackgroundColor);
+    border-top-style: solid;
+    border-right-style: solid;
+    border-color: var(--panelBorderColor);
+    color: var(--textColor);
+    padding: 0 10px 0 10px;
+}
+
+.debugFlowEditor-out {
+    display: block;
+    float: left;
+    width: 50%;
+    height: 100%;
+    background-color: var(--panelBackgroundColor);
+    border-top-style: solid;
+    border-left-style: solid;
+    border-color: var(--panelBorderColor);
+    color: var(--textColor);
+    padding: 0 10px 0 10px;
+}
+
+.debugFlowchart {
+    height: 100%;
+    padding: 0;
+	margin: 0;
+	position: relative;
+	overflow: hidden;
+}
+
+.debugFlowchart pre {
+	display: none;
+}
+
+.events {
+    height: 100%;
+}
+
+.eventList {
+    height: calc(100% - 90px);
+    width: 100%;
+    color: var(--textColor);
+}
+
+.eventItem {
+    display: block;
+    word-wrap: break-word;
+    white-space: normal;
+    background-color: var(--panelComponentBackground);
+    padding: 0 10px 0 10px;
+}
+
+.eventItem:hover {
+    background-color: var(--panelComponentBackground-Focus);
+    color: var(--textColor);
+}
+
+.eventItemInner {
+    display: block;
+    word-wrap: break-word;
+    white-space: normal;
+    background-color: var(--panel2BackgroundColor);
+    padding: 0 10px 0 10px;
+}
+
+.eventItemInner:hover {
+    background-color: var(--panelComponentBackground-Focus);
+    color: var(--textColor);
+}
+
+.click {
+    background-color: var(--panelComponentBackground-Focus);
+}
+
+hr {
+    margin: 10px 0 10px 0;
+}
+
+.debugFlowData {
+    height: calc(100% - 90px);
+    width: 100%;
+}
+
+.runDebugger {
+    position: absolute;
+	z-index: 1;
+	right: 1px;
+    right: 153px;
+    bottom: 0;
+}
+
+.clearDebugger {
+    position: absolute;
+	z-index: 1;
+	right: 1px;
+    bottom: 0;
+}
+
+.sessionsDebugger {
+    position: absolute;
+	z-index: 1;
+	right: 65px;
+    bottom: 0;
+}
